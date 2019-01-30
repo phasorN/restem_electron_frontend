@@ -1,0 +1,17 @@
+{
+  "name": "expenses_manager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sonvert Bhardwaj",
+  "license": "ISC",
+  "dependencies": {
+    "bower": "1.8.8",
+    "electron-json-storage": "^4.1.6",
+    "jquery": "^3.3.1"
+  },
+  "devDependencies": {},
+  "description": ""
+}

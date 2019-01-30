@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Expenses Manager - User Login</title>
+	<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
+	<script type="text/javascript">
+		window.nodeRequire = require;
+		delete window.require;
+		delete window.exports;
+		delete window.module;
+	</script>
+	<script type="text/javascript" src="./node_modules/jquery/dist/jquery.js"></script>
+
+	<style type="text/css">
+		*{
+			/*border: 1px solid white;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+
+			padding: 10px;
+		}
+		
+		#card1{
+	        max-width: 450px;
+	        margin-top: 60px;
+			width: 340px;
+		}
+		#heading{
+			margin-top: 5px;
+			margin-bottom: 8px;
+		}
+		input:focus{
+			outline: none!important;
+			box-shadow: none!important;
+			border-color: #dbe8fc!important;
+		}
+		input{
+			width: 100%;
+			color: white!important;
+			/*border: 0.5px #80bdff solid!important;*/
+			background-color: black!important;
+			height: 36px;
+			padding-left: 5px;
+			border-radius: 0!important;
+			border: none!important;
+			border-bottom: 1px solid grey!important;
+		}
+		input:-webkit-autofill,
+		input:-webkit-autofill:hover,
+		input:-webkit-autofill:focus,
+		input:-webkit-autofill:active {
+		    transition: background-color 5000s ease-in-out 0s;
+		    outline: none;
+		    border: none;
+		}
+		.button{
+			padding: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
+
+			border-radius: 3px;
+			color: white;
+			background-color: black!important;
+			background-image: linear-gradient(#212121, #040404)!important;
+			border: none!important;
+		}
+		.button:hover{
+			cursor: pointer;
+		}
+	</style>
+
+<body>
+
+	<div id="card1" class="mx-auto">
+		<div id="heading_div" class="container">
+			<h4 id="heading">Login</h4>
+		</div>
+		
+		<br>
+
+		<div class="container">
+			<form id="login" action="javascript:login()">
+				<p id="message"></p>
+
+				<input type="username" id="username" placeholder="Enter username" name="username" required autocomplete="false" autofocus="true">
+				<input type="password" id="password" placeholder="Enter password" name="password" required>
+				<p style="margin-top: 10px;">
+					<a href="" class="small" style="display: none; color: grey;">Forgot Password?</a>
+				</p>
+
+				<div style="display: inline;">
+					<button onclick="javascript:window.location.assign('./user_registration.html')" type="button" class="button">Create Account?</button>
+				</div>
+				<div style="display: inline; float: right">
+					<button type="submit"  class="button">Go</button>
+				</div>
+			</form>
+			<br>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		let listeners_added = false;
+		const { ipcRenderer } = nodeRequire('electron');
+
+		function login(){
+
+			$('#message').text("");
+
+			
+			let username = $("#username").val();
+			let password = $("#password").val();
+
+			let json_string = '{"username": "' + username + '", "password": "'+ password + '"}';
+			// console.log(json_string)
+
+			ipcRenderer.send("login", json_string);
+			console.log("login sent");
+
+			// Adding login_failed, login_success, user_offline events.
+			// Earlier the listeners were written here.
+			// If added the listeners every time login was requested.
+			// Using a boolean to keep track if listeners added or not.
+			if( !listeners_added )
+				add_recieve_event_listeners()
+
+		}
+
+		function add_recieve_event_listeners(){
+
+			ipcRenderer.on("login_failed", (event, args) =>{
+				console.log("login_failed recieved");
+				$('#message').text(args);
+				$('#message').css("color", "red");
+			})
+
+			ipcRenderer.on("login_success", (event, args) =>{
+				console.log("login_success recieved");
+				$('#message').text(args);
+				$('#message').css("color", "green");
+
+				// If login successful, fetch expenses list.
+				ipcRenderer.send("fetch_expenses_list", "");
+				console.log("fetch_expenses_list sent");
+			})
+			ipcRenderer.on("user_offline", (event, args) =>{
+				console.log("user_offline recieved");
+				document.getElementById('message').style.display = "inline-block";
+				// document.getElementById('message').innerHTML = args + "Please try again.";
+				$('#message').text(args + " Please try again.");
+				$('#message').css("color", "red");
+			})
+
+			listeners_added = true;
+		}
+	</script>
+
+</body>
+</html>

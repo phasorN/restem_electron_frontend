@@ -1,0 +1,183 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+	<title>Expenses Manager</title>
+	<style type="text/css">
+		*{
+			/*border: 1px solid black;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+
+			padding: 15px;
+		}
+		.main_container{
+			margin: 20px;
+		}
+	</style>
+</head>
+<body>
+	<dir class="main_container">
+		<a href="./expenses_list.html">Expenses list</a>
+		<a href="./expenses_form.html">Add Expenses</a>
+	</dir>
+</body>
+</html> -->
+
+<!-- Using the Expenses_list for time being -->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Expenses Manager</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
+
+	<script type="text/javascript">
+		window.nodeRequire = require;
+		delete window.require;
+		delete window.exports;
+		delete window.module;
+	</script>
+	<script type="text/javascript" src="./node_modules/jquery/dist/jquery.js"></script>
+
+	<style type="text/css">
+		*{
+			/*border: 1px solid white;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+			padding: 15px;
+		}
+
+		p{
+			padding:5px!important;
+			margin:0px!important;
+		}
+		small{
+			padding:5px!important;
+			margin:0px!important;
+			margin-bottom:5px!important;
+		}
+		.button{
+			padding: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
+
+			border-radius: 3px;
+			color: white;
+			background-color: black!important;
+			background-image: linear-gradient(#212121, #040404)!important;
+			border: none!important;
+		}
+		.button:hover{
+			cursor: pointer;
+	</style>
+</head>
+<body onload="body_loaded()">
+	<p>
+		<span>Expenses list</span>
+		<button id="logout_button" style="float: right;" class="button">Logout</button>
+	</p>
+	
+	<p id="message"></p>
+
+	<small><a style="padding-left: 5px;" href="./expenses_form.html">Add New Expense</a></small>
+
+	<div id="expenses_list">
+	</div>
+
+	<script type="text/javascript">
+		let listeners_added = false;
+		const { ipcRenderer } = nodeRequire('electron');
+
+		$('#logout_button').click( ()=>{
+			
+			$('#message').text("");
+			ipcRenderer.send("logout", "");
+
+		})
+
+
+
+		function body_loaded(){
+
+			ipcRenderer.send("send_expenses_list", "");
+			ipcRenderer.on("send_expenses_list", (event, args) =>{
+				expenses_list = args;
+
+				let total_expenses = expenses_list.length;
+
+				if(total_expenses == 0){
+					console.log(expenses_list);
+					console.log(expenses_list.length);
+					var div = document.getElementById('expenses_list');
+
+					var p = document.createElement("p");
+					p.innerHTML = "<br>No Expenses Yet!"
+					div.appendChild(p)
+				}
+				else{
+				for(var i = 0; i < total_expenses; i++){
+					var div = document.getElementById('expenses_list');
+
+					var expense_div = document.createElement("DIV");
+					expense_div.style.color = "green";
+
+					var p = document.createElement("p");
+					p.innerHTML = expenses_list[i]['title'];
+					expense_div.appendChild(p)
+				
+					div.appendChild(expense_div);
+				}
+				}
+
+
+				// Adding logout_failed, logout_success, user_offline events.
+				// Earlier the listeners were written here.
+				// If added the listeners every time body was loaded.
+				// Using a boolean to keep track if listeners added or not.
+				if( !listeners_added ){
+					console.log("Adding Event Listeners");
+					add_recieve_event_listeners();
+				}
+
+
+			})
+		}
+
+		function add_recieve_event_listeners(){
+
+			console.log("Inside add_recieve_event_listeners");
+
+			ipcRenderer.on("logout_failed", (event, args) =>{
+				console.log("logout_failed recieved");
+				$('#message').text(args);
+				$('#message').css("color", "red");
+			})
+
+			ipcRenderer.on("logout_success", (event, args) =>{
+				console.log("logout_success recieved");
+				$('#message').text(args);
+				$('#message').css("color", "green");
+
+				// If logout successful, go to user_login page.
+				window.location.assign("./user_login.html");
+			})
+
+			ipcRenderer.on("user_offline", (event, args) =>{
+				console.log("user_offline recieved");
+				document.getElementById('message').style.display = "inline-block";
+				// document.getElementById('message').innerHTML = args + "Please try again.";
+				$('#message').text(args + " Please try again.");
+				$('#message').css("color", "red");
+
+			})
+
+			listeners_added = true;
+		}
+	</script>
+</body>
+</html>

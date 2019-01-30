@@ -1,0 +1,20 @@
+{
+  "name": "expenses_manager",
+  "description": "",
+  "main": "main.js",
+  "authors": [
+    "Sonvert Bhardwaj"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.2.1"
+  }
+}

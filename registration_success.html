@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Expenses Manager - Registration Success</title>
+	<style type="text/css">
+		*{
+			/*border: 1px solid white;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+			font-family: "monospace";
+
+			padding: 15px;
+		}
+		
+		#card1{
+	        margin-top: 60px;
+		}
+		#heading{
+			margin-top: 5px;
+			margin-bottom: 8px;
+		}
+	</style>
+</head>
+<body onload="loaded()">
+
+	<div id="card1" class="mx-auto">
+		<h3 id="heading">Welcome to Expenses Manager. </h3>
+		<p>You have been registered succesfully.</p>
+		<p>You can log in to your account now.</p>
+		<p>You will be redirected to login page in <span id="seconds">3</span> seconds.</p>
+	</div>
+
+	<script type="text/javascript">
+		function loaded(){
+			let sec = 3;
+			setTimeout(function (){
+				document.getElementById('seconds').innerHTML = (sec - 1).toString();
+				setTimeout(function (){
+					document.getElementById('seconds').innerHTML = (sec - 2).toString();
+					setTimeout(function (){
+						document.getElementById('seconds').innerHTML = (sec - 3).toString();
+						window.location.assign("./user_login.html");
+					}, 1000)
+				}, 1000)
+			}, 1000)
+		}
+	</script>
+</body>
+</html>

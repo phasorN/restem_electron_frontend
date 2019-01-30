@@ -1,0 +1,97 @@
+<!DOCTYPEhtml>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Expenses Manager</title>
+	<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
+	<script type="text/javascript" src="./node_modules/jquery/dist/jquery.js"></script>
+	<style type="text/css">
+		*{
+			/*border: 1px solid white;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+
+			padding: 15px;
+		}
+		
+		#card1{
+	        margin-top: 60px;
+		}
+		#heading{
+			margin-top: 5px;
+			margin-bottom: 8px;
+		}
+		.button{
+			display: none;
+			padding: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
+
+			border-radius: 3px;
+			color: white;
+			background-color: black!important;
+			background-image: linear-gradient(#212121, #040404)!important;
+			border: none!important;
+		}
+		.button:hover{
+			cursor: pointer;
+		}
+	</style>
+
+<body onload="loaded()">
+
+	<div id="card1" class="mx-auto">
+		<h4 id="heading">Welcome to Expenses Manager. </h4>
+		<p>Hold On while we check your session.</p>
+		<button id="user" class="button">Login as XXX?</button>
+		<p>
+			<span style="color: red" id="user_offline"></span>
+			<a id="retry" href="javascript:check_session_state()" style="display: none;">Retry?</a>
+		</p>
+	</div>
+	<script type="text/javascript">
+		const { ipcRenderer } = require('electron');
+		
+		function loaded(){
+			// console.log("AS");
+			console.log("Body loaded.");
+			ipcRenderer.send("initial_check_session_state", "as");
+			console.log("initial_check_session_state sent.");
+
+			ipcRenderer.on("login_success", (event, args) =>{
+				document.getElementById('user').style.display = "inline-block";
+				document.getElementById('user').innerHTML = args;
+
+				// If login successful, fetch expenses list.
+				ipcRenderer.send("fetch_expenses_list", "");
+			})
+
+			ipcRenderer.on("login_failed", (event, args) =>{
+				alert("Your Session Expired. Please Login Again.");
+				window.location.assign("./user_login.html");
+			})
+
+			ipcRenderer.on("token_does_not_exist", (event, args) =>{
+				window.location.assign("./user_login.html");
+			})
+
+			ipcRenderer.on("user_offline", (event, args) =>{
+				document.getElementById('user_offline').style.display = "inline-block";
+				document.getElementById('user_offline').innerHTML = args;
+
+				document.getElementById('retry').style.display = "inline-block";
+			})
+		}
+
+		function check_session_state(){
+			document.getElementById('user_offline').style.display = "none";
+			document.getElementById('retry').style.display = "none";
+			
+			ipcRenderer.send("user_request_check_session_state", "as");
+		}
+	</script>
+</body>
+</html>

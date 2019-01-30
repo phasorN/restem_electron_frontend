@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Expenses Manager - Add New Expense</title>
+	<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
+	<script type="text/javascript">
+		window.nodeRequire = require;
+		delete window.require;
+		delete window.exports;
+		delete window.module;
+	</script>
+	<script type="text/javascript" src="./node_modules/jquery/dist/jquery.js"></script>
+	<style type="text/css">
+		*{
+			/*border: 1px solid black;*/
+		}
+		body{
+			background-color: black;
+			color: white;
+
+			padding: 15px;
+		}
+		#card1{
+	        max-width: 450px;
+	        margin-top: 60px;
+			width: 340px;
+		}
+		#heading{
+			margin-top: 5px;
+			margin-bottom: 8px;
+		}
+		input:focus{
+			outline: none!important;
+			box-shadow: none!important;
+			border-color: #dbe8fc!important;
+		}
+		input{
+			width: 100%;
+			color: white!important;
+			/*border: 0.5px #80bdff solid!important;*/
+			background-color: black!important;
+			height: 36px;
+			padding-left: 5px;
+			border-radius: 0!important;
+			border: none!important;
+			border-bottom: 1px solid grey!important;
+		}
+		input:-webkit-autofill,
+		input:-webkit-autofill:hover,
+		input:-webkit-autofill:focus,
+		input:-webkit-autofill:active {
+		    transition: background-color 5000s ease-in-out 0s;
+		    outline: none;
+		    border: none;
+		}
+		.button{
+			padding: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
+
+			border-radius: 3px;
+			color: white;
+			background-color: black!important;
+			background-image: linear-gradient(#212121, #040404)!important;
+			border: none!important;
+		}
+		.button:hover{
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div id="card1" class="mx-auto">
+		<div id="heading_div" class="container">
+			<h4 id="heading">Add a new expense.</h4>
+		</div>
+		
+		<br>
+
+		<div class="container">
+			<form id="login" action="javascript:add_new_expense()">
+				<p id="message"></p>
+				<input type="text" name="title" placeholder="Title *" id="title" required autofocus="true">
+				<input type="date" name="date" maxlength="30" placeholder="Date *" id="date" required>
+				<input type="number" name="amount" placeholder="Amount *" id="amount" required>
+				<div style="margin-top: 10px; display: inline; float: right">
+					<button type="submit" class="button">Add</button>
+				</div>
+			</form>
+			<br>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		let listeners_added = false;
+		const { ipcRenderer } = nodeRequire('electron');
+
+		function add_new_expense(){
+
+
+			let title = $("#title").val();
+			let date = $("#date").val();
+			let amount = $("#amount").val();
+
+			let json_string = '{"title": "' + title + '", "date": "'+ date + '", "amount": "' + amount + '"}';
+
+			// alert(json_string);
+
+			ipcRenderer.send("add_expense", json_string);
+
+			if( !listeners_added )
+				add_recieve_event_listeners()
+
+		}
+
+		function add_recieve_event_listeners(){
+
+			ipcRenderer.on("add_expense_failed", (event, args) =>{
+				console.log("add_expense_failed recieved");
+				$('#message').text(args);
+				$('#message').css("color", "red");
+			})
+
+			ipcRenderer.on("add_expense_success", (event, args) =>{
+				console.log("add_expense_success recieved");
+				$('#message').text(args);
+				$('#message').css("color", "green");
+
+				window.location.assign("./home_page.html");
+
+			})
+			ipcRenderer.on("user_offline", (event, args) =>{
+				console.log("user_offline recieved");
+				document.getElementById('message').style.display = "inline-block";
+				// document.getElementById('message').innerHTML = args + "Please try again.";
+				$('#message').text(args + " Please try again.");
+				$('#message').css("color", "red");
+			})
+
+			listeners_added = true;
+		}
+	</script>
+</body>
+</html>
